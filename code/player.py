@@ -33,6 +33,7 @@ class Player(pygame.sprite.Sprite):
 		self.on_ceiling = False
 		self.on_left = False
 		self.on_right = False
+		self.can_cast = False
 
 		# health management
 		self.change_health = change_health
@@ -44,6 +45,7 @@ class Player(pygame.sprite.Sprite):
 		self.jump_sound = pygame.mixer.Sound('../audio/effects/jump.wav')
 		self.jump_sound.set_volume(0.5)
 		self.hit_sound = pygame.mixer.Sound('../audio/effects/hit.wav')
+		self.explode_sound = pygame.mixer.Sound('../audio/effects/explode.wav')
 
 	def import_character_assets(self):
 		character_path = '../graphics/character/'
@@ -135,11 +137,17 @@ class Player(pygame.sprite.Sprite):
 		self.direction.y = self.jump_speed
 		self.jump_sound.play()
 
-	def skill(self):
-		for e in enemy.enemy_group.sprites():
-			dis = abs(e.rect.centerx - self.rect.centerx)
-			if dis <= 15 and self.on_ground:
-				enemy.explode()
+	# def skill(self):
+		# player_center = pygame.math.Vector2(self.player.sprite.rect.center)
+		# for enemy in enemy_sprites:
+		# 	enemy_center = pygame.math.Vector2(enemy.rect.center)
+		# 	distance = (player_center - enemy_center).magnitude()
+		# 	if self.can_cast and distance > 2 and distance <= 15:
+		# 		explosion_sprite = ParticleEffect(enemy.rect.center, 'explosion3')
+		# 		self.explosion_sprites.add(explosion_sprite)
+		# 		enemy.kill()
+		# 		self.can_cast = False
+		# self.explode_sound.play()
 
 	def get_damage(self):
 		if not self.invincible:

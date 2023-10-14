@@ -1,4 +1,4 @@
-import pygame 
+import pygame, math
 from support import import_csv_layout, import_cut_graphics
 from settings import tile_size, screen_height, screen_width
 from tiles import Tile, StaticTile, Crate, Palm
@@ -224,7 +224,20 @@ class Level:
 					self.explosion_sprites.add(explosion_sprite)
 					enemy.kill()
 					self.player.sprite.get_damage()
-			
+
+	
+	# def check_enemy_explosion2(self):
+	# 	player = self.player.sprite
+	# 	player_center = pygame.math.Vector2(self.player.sprite.rect.center)
+	# 	for enemy in self.enemy_sprites:
+	# 		enemy_center = pygame.math.Vector2(enemy.rect.center)
+	# 		distance = (player_center - enemy_center).magnitude()
+	# 		if player.can_cast and distance > 2 and distance <= 15:
+	# 			explosion_sprite = ParticleEffect(enemy.rect.center, 'explosion3')
+	# 			self.explosion_sprites.add(explosion_sprite)
+	# 			enemy.kill()
+	# 			player.can_cast = False
+					
 	def check_enemy_collisions(self):
 		enemy_collisions = pygame.sprite.spritecollide(self.player.sprite,self.enemy_sprites,False)
 
@@ -300,5 +313,6 @@ class Level:
 
 		self.check_enemy_collisions()
 		self.check_enemy_explosion1()
+		self.check_enemy_explosion2()
 		# water 
 		self.water.draw(self.display_surface,self.world_shift)
