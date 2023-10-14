@@ -16,6 +16,7 @@ class Player(pygame.sprite.Sprite):
 		self.import_dust_run_particles()
 		self.import_shield_particles()
 
+		self.is_casting = False
 		self.shield_start_time = 0
 		self.shield_duration = 5
 		self.shield_cooldown = 10
@@ -44,6 +45,8 @@ class Player(pygame.sprite.Sprite):
 		self.on_right = False
 		self.can_cast_shield = False
 
+		
+
 		# health management
 		self.change_health = change_health
 		self.invincible = False
@@ -52,9 +55,11 @@ class Player(pygame.sprite.Sprite):
 
 		# audio 
 		self.jump_sound = pygame.mixer.Sound('../audio/effects/jump.wav')
-		self.jump_sound.set_volume(0.5)
+		self.jump_sound.set_volume(0.1)
 		self.hit_sound = pygame.mixer.Sound('../audio/effects/hit.wav')
 		self.explode_sound = pygame.mixer.Sound('../audio/effects/explode.wav')
+		self.shield_sound = pygame.mixer.Sound('../audio/effects/shield.wav')
+		self.shield_sound.set_volume(0.5)
 
 	def import_character_assets(self):
 		character_path = '../graphics/character/'
@@ -113,7 +118,7 @@ class Player(pygame.sprite.Sprite):
 	
 	def shield_animation(self):
 		if self.can_cast_shield and time.time() - self.shield_start_time < self.shield_duration:
-			
+			self.is_casting = True
 			self.shield_frame_index += self.shield_animation_speed
 			if self.shield_frame_index >= len(self.shield_particles):
 				self.shield_frame_index = 0
@@ -126,6 +131,8 @@ class Player(pygame.sprite.Sprite):
 				pos = self.rect.topright - pygame.math.Vector2(73,30)
 				flipped_shield_particle = pygame.transform.flip(shield_particle,True,False)
 				self.display_surface.blit(flipped_shield_particle,pos)
+		else:
+			self.is_casting = False
 
 	def get_input(self):
 		keys = pygame.key.get_pressed()
@@ -168,12 +175,13 @@ class Player(pygame.sprite.Sprite):
 	def shield(self):
 		current_time = time.time()
 		if current_time - self.shield_start_time >= self.shield_cooldown:
+			self.is_casting = True
+			self.shield_sound.play()
 			self.can_cast_shield = True
 			self.shield_start_time = current_time
-
+			
 	def get_damage(self):
 		if not self.invincible:
-			self.hit_sound.play()
 			self.change_health(-10)
 			self.invincible = True
 			self.hurt_time = pygame.time.get_ticks()

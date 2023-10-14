@@ -17,6 +17,12 @@ class Level:
 
 		# audio 
 		self.stomp_sound = pygame.mixer.Sound('../audio/effects/stomp.wav')
+		self.stomp_sound.set_volume(0.5)
+		self.explode_sound = pygame.mixer.Sound('../audio/effects/explode.wav')
+		self.explode_sound.set_volume(0.5)
+		self.get_hit_sound = pygame.mixer.Sound('../audio/effects/get_hit.wav')
+		self.get_hit_sound.set_volume(340)
+		
 
 		# overworld connection 
 		self.create_overworld = create_overworld
@@ -65,6 +71,7 @@ class Level:
 		# constraint 
 		constraint_layout = import_csv_layout(level_data['constraints'])
 		self.constraint_sprites = self.create_tile_group(constraint_layout,'constraint')
+
 
 		# decoration 
 		self.sky = Sky(8)
@@ -210,34 +217,7 @@ class Level:
 		if pygame.sprite.spritecollide(self.player.sprite,self.goal,False):
 			self.create_overworld(self.current_level,self.new_max_level)
 
-	def check_enemy_explosion1(self):
-		enemy_collisions = pygame.sprite.spritecollide(self.player.sprite,self.enemy_sprites,False)
 
-		if enemy_collisions:
-			for enemy in enemy_collisions:
-				enemy_center = enemy.rect.centery
-				enemy_top = enemy.rect.top
-				player_bottom = self.player.sprite.rect.bottom
-				if not(enemy_top < player_bottom < enemy_center and self.player.sprite.direction.y >= 0):
-					self.stomp_sound.play()
-					explosion_sprite = ParticleEffect(enemy.rect.center,'explosion2')
-					self.explosion_sprites.add(explosion_sprite)
-					enemy.kill()
-					self.player.sprite.get_damage()
-
-	
-	# def check_enemy_explosion2(self):
-	# 	player = self.player.sprite
-	# 	player_center = pygame.math.Vector2(self.player.sprite.rect.center)
-	# 	for enemy in self.enemy_sprites:
-	# 		enemy_center = pygame.math.Vector2(enemy.rect.center)
-	# 		distance = (player_center - enemy_center).magnitude()
-	# 		if player.can_cast and distance > 2 and distance <= 15:
-	# 			explosion_sprite = ParticleEffect(enemy.rect.center, 'explosion3')
-	# 			self.explosion_sprites.add(explosion_sprite)
-	# 			enemy.kill()
-	# 			player.can_cast = False
-					
 	def check_enemy_collisions(self):
 		enemy_collisions = pygame.sprite.spritecollide(self.player.sprite,self.enemy_sprites,False)
 
@@ -253,7 +233,17 @@ class Level:
 					self.explosion_sprites.add(explosion_sprite)
 					enemy.kill()
 				else:
-					self.player.sprite.get_damage()
+					if not self.player.sprite.is_casting:
+						self.get_hit_sound.play()
+						explosion_sprite = ParticleEffect(self.player.sprite.rect.center,'explosion2')
+						self.explosion_sprites.add(explosion_sprite)
+						enemy.kill()
+						self.player.sprite.get_damage()
+					else:
+						self.explode_sound.play()
+						explosion_sprite = ParticleEffect(enemy.rect.center - pygame.math.Vector2(10,73),'explosion3')
+						self.explosion_sprites.add(explosion_sprite)
+						enemy.kill()
 
 	def run(self):
 		# run the entire game / level 
@@ -312,7 +302,7 @@ class Level:
 		self.check_win()
 
 		self.check_enemy_collisions()
-		self.check_enemy_explosion1()
+		# self.check_enemy_explosion1()
 		# self.check_enemy_explosion2()
 		# water 
 		self.water.draw(self.display_surface,self.world_shift)
