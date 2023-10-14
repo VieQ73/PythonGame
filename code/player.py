@@ -1,4 +1,4 @@
-import pygame, enemy
+import pygame, enemy, time
 from support import import_folder
 from math import sin
 
@@ -15,10 +15,16 @@ class Player(pygame.sprite.Sprite):
 		# dust particles 
 		self.import_dust_run_particles()
 		self.import_shield_particles()
-		self.dust_frame_index = 0
-		self.dust_animation_speed = 0.15
+
+		self.shield_start_time = 0
+		self.shield_duration = 5
+		self.shield_cooldown = 10
 		self.shield_frame_index = 0
 		self.shield_animation_speed = 0.2
+
+		self.dust_frame_index = 0
+		self.dust_animation_speed = 0.15
+
 		self.display_surface = surface
 		self.create_jump_particles = create_jump_particles
 
@@ -36,7 +42,7 @@ class Player(pygame.sprite.Sprite):
 		self.on_ceiling = False
 		self.on_left = False
 		self.on_right = False
-		self.can_cast = False
+		self.can_cast_shield = False
 
 		# health management
 		self.change_health = change_health
@@ -106,18 +112,20 @@ class Player(pygame.sprite.Sprite):
 				self.display_surface.blit(flipped_dust_particle,pos)
 	
 	def shield_animation(self):
-		self.shield_frame_index += self.shield_animation_speed
-		if self.shield_frame_index >= len(self.shield_particles):
-			self.shield_frame_index = 0
+		if self.can_cast_shield and time.time() - self.shield_start_time < self.shield_duration:
+			
+			self.shield_frame_index += self.shield_animation_speed
+			if self.shield_frame_index >= len(self.shield_particles):
+				self.shield_frame_index = 0
 
-		shield_particle = self.shield_particles[int(self.shield_frame_index)]
-		if self.facing_right:
-			pos = self.rect.topleft - pygame.math.Vector2(30,30)
-			self.display_surface.blit(shield_particle,pos)
-		else:
-			pos = self.rect.topright - pygame.math.Vector2(74,30)
-			flipped_shield_particle = pygame.transform.flip(shield_particle,True,False)
-			self.display_surface.blit(flipped_shield_particle,pos)
+			shield_particle = self.shield_particles[int(self.shield_frame_index)]
+			if self.facing_right:
+				pos = self.rect.topleft - pygame.math.Vector2(30,30)
+				self.display_surface.blit(shield_particle,pos)
+			else:
+				pos = self.rect.topright - pygame.math.Vector2(73,30)
+				flipped_shield_particle = pygame.transform.flip(shield_particle,True,False)
+				self.display_surface.blit(flipped_shield_particle,pos)
 
 	def get_input(self):
 		keys = pygame.key.get_pressed()
@@ -135,8 +143,8 @@ class Player(pygame.sprite.Sprite):
 			self.jump()
 			self.create_jump_particles(self.rect.midbottom)
 		
-		if keys[pygame.K_f] and self.on_ground:
-			self.skill()
+		if keys[pygame.K_f]:
+			self.shield()
 
 	def get_status(self):
 		if self.direction.y < 0:
@@ -157,17 +165,11 @@ class Player(pygame.sprite.Sprite):
 		self.direction.y = self.jump_speed
 		self.jump_sound.play()
 
-	# def skill(self):
-		# player_center = pygame.math.Vector2(self.player.sprite.rect.center)
-		# for enemy in enemy_sprites:
-		# 	enemy_center = pygame.math.Vector2(enemy.rect.center)
-		# 	distance = (player_center - enemy_center).magnitude()
-		# 	if self.can_cast and distance > 2 and distance <= 15:
-		# 		explosion_sprite = ParticleEffect(enemy.rect.center, 'explosion3')
-		# 		self.explosion_sprites.add(explosion_sprite)
-		# 		enemy.kill()
-		# 		self.can_cast = False
-		# self.explode_sound.play()
+	def shield(self):
+		current_time = time.time()
+		if current_time - self.shield_start_time >= self.shield_cooldown:
+			self.can_cast_shield = True
+			self.shield_start_time = current_time
 
 	def get_damage(self):
 		if not self.invincible:
