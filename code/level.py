@@ -313,6 +313,6 @@ class Level:
 
 		self.check_enemy_collisions()
 		self.check_enemy_explosion1()
-		self.check_enemy_explosion2()
+		# self.check_enemy_explosion2()
 		# water 
 		self.water.draw(self.display_surface,self.world_shift)

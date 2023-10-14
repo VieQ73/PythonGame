@@ -14,8 +14,11 @@ class Player(pygame.sprite.Sprite):
 		
 		# dust particles 
 		self.import_dust_run_particles()
+		self.import_shield_particles()
 		self.dust_frame_index = 0
 		self.dust_animation_speed = 0.15
+		self.shield_frame_index = 0
+		self.shield_animation_speed = 0.2
 		self.display_surface = surface
 		self.create_jump_particles = create_jump_particles
 
@@ -58,6 +61,9 @@ class Player(pygame.sprite.Sprite):
 	def import_dust_run_particles(self):
 		self.dust_run_particles = import_folder('../graphics/character/dust_particles/run')
 
+	def import_shield_particles(self):
+		self.shield_particles = import_folder('../graphics/character/Counter')
+
 	def animate(self):
 		animation = self.animations[self.status]
 
@@ -98,6 +104,20 @@ class Player(pygame.sprite.Sprite):
 				pos = self.rect.bottomright - pygame.math.Vector2(6,10)
 				flipped_dust_particle = pygame.transform.flip(dust_particle,True,False)
 				self.display_surface.blit(flipped_dust_particle,pos)
+	
+	def shield_animation(self):
+		self.shield_frame_index += self.shield_animation_speed
+		if self.shield_frame_index >= len(self.shield_particles):
+			self.shield_frame_index = 0
+
+		shield_particle = self.shield_particles[int(self.shield_frame_index)]
+		if self.facing_right:
+			pos = self.rect.topleft - pygame.math.Vector2(30,30)
+			self.display_surface.blit(shield_particle,pos)
+		else:
+			pos = self.rect.topright - pygame.math.Vector2(74,30)
+			flipped_shield_particle = pygame.transform.flip(shield_particle,True,False)
+			self.display_surface.blit(flipped_shield_particle,pos)
 
 	def get_input(self):
 		keys = pygame.key.get_pressed()
@@ -172,6 +192,7 @@ class Player(pygame.sprite.Sprite):
 		self.get_status()
 		self.animate()
 		self.run_dust_animation()
+		self.shield_animation()
 		self.invincibility_timer()
 		self.wave_value()
 		
