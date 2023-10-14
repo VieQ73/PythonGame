@@ -1,6 +1,7 @@
-import pygame 
+import pygame, enemy
 from support import import_folder
 from math import sin
+
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self,pos,surface,create_jump_particles,change_health):
@@ -111,6 +112,9 @@ class Player(pygame.sprite.Sprite):
 		if keys[pygame.K_SPACE] and self.on_ground:
 			self.jump()
 			self.create_jump_particles(self.rect.midbottom)
+		
+		if keys[pygame.K_f] and self.on_ground:
+			self.skill()
 
 	def get_status(self):
 		if self.direction.y < 0:
@@ -130,6 +134,12 @@ class Player(pygame.sprite.Sprite):
 	def jump(self):
 		self.direction.y = self.jump_speed
 		self.jump_sound.play()
+
+	def skill(self):
+		for e in enemy.enemy_group.sprites():
+			dis = abs(e.rect.centerx - self.rect.centerx)
+			if dis <= 15 and self.on_ground:
+				enemy.explode()
 
 	def get_damage(self):
 		if not self.invincible:

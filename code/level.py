@@ -209,6 +209,21 @@ class Level:
 	def check_win(self):
 		if pygame.sprite.spritecollide(self.player.sprite,self.goal,False):
 			self.create_overworld(self.current_level,self.new_max_level)
+
+	def check_enemy_explosion1(self):
+		enemy_collisions = pygame.sprite.spritecollide(self.player.sprite,self.enemy_sprites,False)
+
+		if enemy_collisions:
+			for enemy in enemy_collisions:
+				enemy_center = enemy.rect.centery
+				enemy_top = enemy.rect.top
+				player_bottom = self.player.sprite.rect.bottom
+				if not(enemy_top < player_bottom < enemy_center and self.player.sprite.direction.y >= 0):
+					self.stomp_sound.play()
+					explosion_sprite = ParticleEffect(enemy.rect.center,'explosion2')
+					self.explosion_sprites.add(explosion_sprite)
+					enemy.kill()
+					self.player.sprite.get_damage()
 			
 	def check_enemy_collisions(self):
 		enemy_collisions = pygame.sprite.spritecollide(self.player.sprite,self.enemy_sprites,False)
@@ -284,6 +299,6 @@ class Level:
 		self.check_win()
 
 		self.check_enemy_collisions()
-
+		self.check_enemy_explosion1()
 		# water 
 		self.water.draw(self.display_surface,self.world_shift)
