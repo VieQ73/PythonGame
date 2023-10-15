@@ -15,6 +15,14 @@ class Player(pygame.sprite.Sprite):
 		# dust particles 
 		self.import_dust_run_particles()
 		self.import_shield_particles()
+		self.import_cast_particles()
+
+		self.is_casting2 = False
+		self.cast_start_time = 0
+		self.cast_duration = 5
+		self.cast_cooldown = 10
+		self.cast_animation_speed = 0.2
+		self.cast_frame_index = 0
 
 		self.is_casting = False
 		self.shield_start_time = 0
@@ -43,9 +51,9 @@ class Player(pygame.sprite.Sprite):
 		self.on_ceiling = False
 		self.on_left = False
 		self.on_right = False
-		self.can_cast_shield = False
 
-		
+		self.can_cast_shield = False
+		self.can_cast = False
 
 		# health management
 		self.change_health = change_health
@@ -60,6 +68,8 @@ class Player(pygame.sprite.Sprite):
 		self.explode_sound = pygame.mixer.Sound('../audio/effects/explode.wav')
 		self.shield_sound = pygame.mixer.Sound('../audio/effects/shield.wav')
 		self.shield_sound.set_volume(0.5)
+		self.cast_sound = pygame.mixer.Sound('../audio/effects/cast.wav')
+		self.cast_sound.set_volume(2)
 
 	def import_character_assets(self):
 		character_path = '../graphics/character/'
@@ -74,6 +84,9 @@ class Player(pygame.sprite.Sprite):
 
 	def import_shield_particles(self):
 		self.shield_particles = import_folder('../graphics/character/Counter')
+
+	def import_cast_particles(self):
+		self.cast_particles = import_folder('../graphics/character/cast')
 
 	def animate(self):
 		animation = self.animations[self.status]
@@ -115,7 +128,26 @@ class Player(pygame.sprite.Sprite):
 				pos = self.rect.bottomright - pygame.math.Vector2(6,10)
 				flipped_dust_particle = pygame.transform.flip(dust_particle,True,False)
 				self.display_surface.blit(flipped_dust_particle,pos)
-	
+
+	def cast_animation(self):
+		if self.can_cast and time.time() - self.cast_start_time < self.cast_duration:
+			self.is_casting2 = True
+			self.cast_frame_index += self.cast_animation_speed
+			if self.cast_frame_index >= len(self.cast_particles):
+				self.cast_frame_index = 0
+
+			cast_particle = self.cast_particles[int(self.cast_frame_index)]
+			if self.facing_right:
+				pos = self.rect.topleft - pygame.math.Vector2(25,77)
+				self.display_surface.blit(cast_particle,pos)
+			else:
+				pos = self.rect.topright - pygame.math.Vector2(77,77)
+				flipped_shield_particle = pygame.transform.flip(cast_particle,True,False)
+				self.display_surface.blit(flipped_shield_particle,pos)
+		else:
+			self.is_casting2 = False
+
+
 	def shield_animation(self):
 		if self.can_cast_shield and time.time() - self.shield_start_time < self.shield_duration:
 			self.is_casting = True
@@ -153,6 +185,9 @@ class Player(pygame.sprite.Sprite):
 		if keys[pygame.K_f]:
 			self.shield()
 
+		elif keys[pygame.K_r]:
+			self.cast()
+
 	def get_status(self):
 		if self.direction.y < 0:
 			self.status = 'jump'
@@ -179,10 +214,18 @@ class Player(pygame.sprite.Sprite):
 			self.shield_sound.play()
 			self.can_cast_shield = True
 			self.shield_start_time = current_time
+
+	def cast(self):
+		current_time = time.time()
+		if current_time - self.cast_start_time >= self.cast_cooldown:
+			self.is_casting2 = True
+			self.cast_sound.play()
+			self.can_cast = True
+			self.cast_start_time = current_time
 			
 	def get_damage(self):
 		if not self.invincible:
-			self.change_health(-10)
+			self.change_health(-5)
 			self.invincible = True
 			self.hurt_time = pygame.time.get_ticks()
 
@@ -203,6 +246,7 @@ class Player(pygame.sprite.Sprite):
 		self.animate()
 		self.run_dust_animation()
 		self.shield_animation()
+		self.cast_animation()
 		self.invincibility_timer()
 		self.wave_value()
 		

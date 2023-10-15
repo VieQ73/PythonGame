@@ -1,9 +1,9 @@
-import pygame, math
+import pygame, time
 from support import import_csv_layout, import_cut_graphics
 from settings import tile_size, screen_height, screen_width
 from tiles import Tile, StaticTile, Crate, Palm
-from enemy import Enemy, Ufo
 from decoration import Sky, Water, Clouds
+from enemy import Enemy, Ufo
 from player import Player
 from particles import ParticleEffect
 from game_data import levels
@@ -22,6 +22,8 @@ class Level:
 		self.explode_sound.set_volume(0.5)
 		self.get_hit_sound = pygame.mixer.Sound('../audio/effects/get_hit.wav')
 		self.get_hit_sound.set_volume(340)
+		self.explode_sound2 = pygame.mixer.Sound('../audio/effects/explode2.wav')
+		self.explode_sound2.set_volume(300)
 		
 
 		# overworld connection 
@@ -36,6 +38,9 @@ class Level:
 		self.goal = pygame.sprite.GroupSingle()
 		self.player_setup(player_layout,change_health)
 
+		# enemy 
+		enemy_layout = import_csv_layout(level_data['enemies'])
+		self.enemy_sprites = self.create_tile_group(enemy_layout,'enemies')
 
 		# dust 
 		self.dust_sprite = pygame.sprite.GroupSingle()
@@ -63,10 +68,6 @@ class Level:
 		# background palms 
 		bg_palm_layout = import_csv_layout(level_data['bg palms'])
 		self.bg_palm_sprites = self.create_tile_group(bg_palm_layout,'bg palms')
-
-		# enemy 
-		enemy_layout = import_csv_layout(level_data['enemies'])
-		self.enemy_sprites = self.create_tile_group(enemy_layout,'enemies')
 
 		# constraint 
 		constraint_layout = import_csv_layout(level_data['constraints'])
@@ -217,6 +218,21 @@ class Level:
 		if pygame.sprite.spritecollide(self.player.sprite,self.goal,False):
 			self.create_overworld(self.current_level,self.new_max_level)
 
+	def check_cast(self):
+		if self.player.sprite.can_cast and time.time() - self.player.sprite.cast_start_time < self.player.sprite.cast_duration:
+			self.player.sprite.is_casting2 = True
+			for enemy in self.enemy_sprites.sprites():
+				player_pos = pygame.math.Vector2(self.player.sprite.rect.center)
+				enemy_pos = pygame.math.Vector2(enemy.rect.center)
+				distance_to_enemy = player_pos.distance_to(enemy_pos)
+				if distance_to_enemy < 150:
+					if self.player.sprite.is_casting2:
+							explosion_sprite = ParticleEffect(enemy.rect.center,'explosion4')
+							self.explosion_sprites.add(explosion_sprite)
+							self.explode_sound.play()
+							enemy.kill()
+		else:
+			self.player.sprite.is_casting2 = False
 
 	def check_enemy_collisions(self):
 		enemy_collisions = pygame.sprite.spritecollide(self.player.sprite,self.enemy_sprites,False)
@@ -237,10 +253,9 @@ class Level:
 						self.get_hit_sound.play()
 						explosion_sprite = ParticleEffect(self.player.sprite.rect.center,'explosion2')
 						self.explosion_sprites.add(explosion_sprite)
-						enemy.kill()
 						self.player.sprite.get_damage()
 					else:
-						self.explode_sound.play()
+						self.explode_sound2.play()
 						explosion_sprite = ParticleEffect(enemy.rect.center - pygame.math.Vector2(10,73),'explosion3')
 						self.explosion_sprites.add(explosion_sprite)
 						enemy.kill()
@@ -302,7 +317,6 @@ class Level:
 		self.check_win()
 
 		self.check_enemy_collisions()
-		# self.check_enemy_explosion1()
-		# self.check_enemy_explosion2()
+		self.check_cast()
 		# water 
 		self.water.draw(self.display_surface,self.world_shift)
