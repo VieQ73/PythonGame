@@ -225,7 +225,7 @@ class Level:
 				player_pos = pygame.math.Vector2(self.player.sprite.rect.center)
 				enemy_pos = pygame.math.Vector2(enemy.rect.center)
 				distance_to_enemy = player_pos.distance_to(enemy_pos)
-				if distance_to_enemy < 150:
+				if distance_to_enemy < 137:
 					if self.player.sprite.is_casting2:
 							explosion_sprite = ParticleEffect(enemy.rect.center,'explosion4')
 							self.explosion_sprites.add(explosion_sprite)
