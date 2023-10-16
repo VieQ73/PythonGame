@@ -1,4 +1,4 @@
-import pygame, os
+import pygame, random
 from tiles import AnimatedTile
 from random import randint
 from support import import_folder
@@ -9,7 +9,7 @@ class Ufo(AnimatedTile):
 	def __init__(self,size,x,y):
 		super().__init__(size,x,y,'../graphics/enemy/ufo')
 		self.rect.y += size - self.image.get_size()[1]
-		self.speed = randint(1,3)
+		self.speed = random.uniform(0.5, 2.5)
 
 	def move(self):
 		self.rect.x += self.speed
@@ -31,7 +31,7 @@ class Enemy(AnimatedTile):
 	def __init__(self,size,x,y):
 		super().__init__(size,x,y,'../graphics/enemy/run')
 		self.rect.y += size - self.image.get_size()[1]
-		self.speed = randint(1,4)
+		self.speed = random.uniform(1, 3)
 
 	def move(self):
 		self.rect.x += self.speed

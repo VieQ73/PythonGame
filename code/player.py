@@ -16,6 +16,7 @@ class Player(pygame.sprite.Sprite):
 		self.import_dust_run_particles()
 		self.import_shield_particles()
 		self.import_cast_particles()
+		self.import_shield_particles2()
 
 		self.is_casting2 = False
 		self.cast_start_time = 0
@@ -29,6 +30,7 @@ class Player(pygame.sprite.Sprite):
 		self.shield_duration = 5
 		self.shield_cooldown = 10
 		self.shield_frame_index = 0
+		self.shield_frame_index2 = 0
 		self.shield_animation_speed = 0.2
 
 		self.dust_frame_index = 0
@@ -84,6 +86,9 @@ class Player(pygame.sprite.Sprite):
 
 	def import_shield_particles(self):
 		self.shield_particles = import_folder('../graphics/character/Counter')
+	
+	def import_shield_particles2(self):
+		self.shield_particles2 = import_folder('../graphics/character/shield')
 
 	def import_cast_particles(self):
 		self.cast_particles = import_folder('../graphics/character/cast')
@@ -132,16 +137,17 @@ class Player(pygame.sprite.Sprite):
 	def cast_animation(self):
 		if self.can_cast and time.time() - self.cast_start_time < self.cast_duration:
 			self.is_casting2 = True
+			self.is_casting = False
 			self.cast_frame_index += self.cast_animation_speed
 			if self.cast_frame_index >= len(self.cast_particles):
 				self.cast_frame_index = 0
 
 			cast_particle = self.cast_particles[int(self.cast_frame_index)]
 			if self.facing_right:
-				pos = self.rect.topleft - pygame.math.Vector2(25,77)
+				pos = self.rect.topleft - pygame.math.Vector2(100,90)
 				self.display_surface.blit(cast_particle,pos)
 			else:
-				pos = self.rect.topright - pygame.math.Vector2(77,77)
+				pos = self.rect.topright - pygame.math.Vector2(50,90)
 				flipped_shield_particle = pygame.transform.flip(cast_particle,True,False)
 				self.display_surface.blit(flipped_shield_particle,pos)
 		else:
@@ -151,18 +157,27 @@ class Player(pygame.sprite.Sprite):
 	def shield_animation(self):
 		if self.can_cast_shield and time.time() - self.shield_start_time < self.shield_duration:
 			self.is_casting = True
+			self.is_casting2 = False
 			self.shield_frame_index += self.shield_animation_speed
 			if self.shield_frame_index >= len(self.shield_particles):
 				self.shield_frame_index = 0
+			if self.shield_frame_index2 >= len(self.shield_particles2):
+				self.shield_frame_index2 = 0
 
 			shield_particle = self.shield_particles[int(self.shield_frame_index)]
+			shield_particle2 = self.shield_particles2[int(self.shield_frame_index2)]
 			if self.facing_right:
-				pos = self.rect.topleft - pygame.math.Vector2(30,30)
+				pos = self.rect.topleft - pygame.math.Vector2(30,90)
+				pos2 = self.rect.topleft - pygame.math.Vector2(30,30)
+				self.display_surface.blit(shield_particle2, pos2)
 				self.display_surface.blit(shield_particle,pos)
 			else:
-				pos = self.rect.topright - pygame.math.Vector2(73,30)
+				pos = self.rect.topright - pygame.math.Vector2(70,90)
+				pos2 = self.rect.topright - pygame.math.Vector2(73, 30)
+				flipped_shield_particle2 = pygame.transform.flip(shield_particle2, True, False)
 				flipped_shield_particle = pygame.transform.flip(shield_particle,True,False)
 				self.display_surface.blit(flipped_shield_particle,pos)
+				self.display_surface.blit(flipped_shield_particle2, pos2)
 		else:
 			self.is_casting = False
 
@@ -211,6 +226,7 @@ class Player(pygame.sprite.Sprite):
 		current_time = time.time()
 		if current_time - self.shield_start_time >= self.shield_cooldown:
 			self.is_casting = True
+			self.can_cast = False
 			self.shield_sound.play()
 			self.can_cast_shield = True
 			self.shield_start_time = current_time
@@ -219,6 +235,7 @@ class Player(pygame.sprite.Sprite):
 		current_time = time.time()
 		if current_time - self.cast_start_time >= self.cast_cooldown:
 			self.is_casting2 = True
+			self.can_cast_shield = False
 			self.cast_sound.play()
 			self.can_cast = True
 			self.cast_start_time = current_time

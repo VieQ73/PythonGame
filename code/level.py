@@ -227,10 +227,10 @@ class Level:
 				distance_to_enemy = player_pos.distance_to(enemy_pos)
 				if distance_to_enemy < 137:
 					if self.player.sprite.is_casting2:
-							explosion_sprite = ParticleEffect(enemy.rect.center,'explosion4')
-							self.explosion_sprites.add(explosion_sprite)
-							self.explode_sound.play()
-							enemy.kill()
+						explosion_sprite = ParticleEffect(enemy.rect.center,'explosion4')
+						self.explosion_sprites.add(explosion_sprite)
+						self.explode_sound.play()
+						enemy.kill()
 		else:
 			self.player.sprite.is_casting2 = False
 
@@ -256,7 +256,7 @@ class Level:
 						self.player.sprite.get_damage()
 					else:
 						self.explode_sound2.play()
-						explosion_sprite = ParticleEffect(enemy.rect.center - pygame.math.Vector2(10,73),'explosion3')
+						explosion_sprite = ParticleEffect(enemy.rect.center - pygame.math.Vector2(-15,85),'explosion3')
 						self.explosion_sprites.add(explosion_sprite)
 						enemy.kill()
 
