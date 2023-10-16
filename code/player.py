@@ -69,9 +69,9 @@ class Player(pygame.sprite.Sprite):
 		self.hit_sound = pygame.mixer.Sound('../audio/effects/hit.wav')
 		self.explode_sound = pygame.mixer.Sound('../audio/effects/explode.wav')
 		self.shield_sound = pygame.mixer.Sound('../audio/effects/shield.wav')
-		self.shield_sound.set_volume(0.5)
+		self.shield_sound.set_volume(4)
 		self.cast_sound = pygame.mixer.Sound('../audio/effects/cast.wav')
-		self.cast_sound.set_volume(2)
+		self.cast_sound.set_volume(4)
 
 	def import_character_assets(self):
 		character_path = '../graphics/character/'
