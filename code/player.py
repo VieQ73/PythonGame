@@ -167,12 +167,12 @@ class Player(pygame.sprite.Sprite):
 			shield_particle = self.shield_particles[int(self.shield_frame_index)]
 			shield_particle2 = self.shield_particles2[int(self.shield_frame_index2)]
 			if self.facing_right:
-				pos = self.rect.topright - pygame.math.Vector2(90,50)
+				pos = self.rect.topright - pygame.math.Vector2(97,65)
 				pos2 = self.rect.topleft - pygame.math.Vector2(30,30)
 				self.display_surface.blit(shield_particle2, pos2)
 				self.display_surface.blit(shield_particle,pos)
 			else:
-				pos = self.rect.topleft - pygame.math.Vector2(10,50)
+				pos = self.rect.topleft - pygame.math.Vector2(3,65)
 				pos2 = self.rect.topright - pygame.math.Vector2(73, 30)
 				flipped_shield_particle2 = pygame.transform.flip(shield_particle2, True, False)
 				flipped_shield_particle = pygame.transform.flip(shield_particle,True,False)
@@ -242,7 +242,7 @@ class Player(pygame.sprite.Sprite):
 			
 	def get_damage(self):
 		if not self.invincible:
-			self.change_health(-5)
+			self.change_health(-20)
 			self.invincible = True
 			self.hurt_time = pygame.time.get_ticks()
 
